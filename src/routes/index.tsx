@@ -38,6 +38,11 @@ const BADGE: Record<Result["level"], { label: string; cls: string }> = {
 function Index() {
   const [text, setText] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const readLabelFn = useServerFn(readLabel);
 
   const run = (value: string) => {
     setText(value);
