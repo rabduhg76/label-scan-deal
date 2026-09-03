@@ -6,20 +6,40 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import path from "node:path";
-import { existsSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
+
+const debugEntries = () => {
+  try {
+    const cwd = process.cwd();
+    const srcDir = path.resolve(cwd, "src");
+    console.error("[DEBUG] cwd:", cwd);
+    console.error("[DEBUG] src dir:", srcDir, "exists:", statSync(srcDir).isDirectory());
+    const list = readdirSync(srcDir);
+    console.error("[DEBUG] src contents:", list.join(","));
+    const candidates = ["router.tsx", "router.ts", "start.ts", "server.ts", "client.tsx"];
+    for (const c of candidates) {
+      const p = path.resolve(srcDir, c);
+      console.error(`[DEBUG] ${c} exists:`, statSync(p).isFile());
+    }
+  } catch (e: any) {
+    console.error("[DEBUG] failed:", e?.message);
+  }
+};
 
 export default defineConfig({
   vite: {
     plugins: [
       {
-        name: "debug-resolve",
+        name: "debug-pre-config",
+        config(_userConfig, _env) {
+          debugEntries();
+          return {};
+        },
+      },
+      {
+        name: "debug-resolved",
         configResolved(config) {
-          console.error("[DEBUG] cwd:", process.cwd());
           console.error("[DEBUG] vite.root:", config.root);
-          console.error("[DEBUG] src/router.tsx exists:", existsSync(path.resolve(config.root, "src/router.tsx")));
-          console.error("[DEBUG] src/router.tsx exists (cwd):", existsSync(path.resolve(process.cwd(), "src/router.tsx")));
-          console.error("[DEBUG] src/start.ts exists:", existsSync(path.resolve(config.root, "src/start.ts")));
-          console.error("[DEBUG] src/server.ts exists:", existsSync(path.resolve(config.root, "src/server.ts")));
         },
       },
     ],
