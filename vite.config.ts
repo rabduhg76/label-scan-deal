@@ -59,8 +59,8 @@ export default defineConfig({
     ],
   },
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
+    router: { entry: "router.tsx" },
+    server: { entry: "server.ts" },
+    start: { entry: "start.ts" },
   },
 });
