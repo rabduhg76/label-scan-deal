@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = ".output/public"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
+  force = false
+
+[functions]
+  directory = ".output/server"
+  node_bundler = "esbuild"
