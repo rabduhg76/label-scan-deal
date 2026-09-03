@@ -44,6 +44,37 @@ function Index() {
     setResult(value.trim() ? analyze(value) : null);
   };
 
+  const onFile = async (file: File) => {
+    setError(null);
+    if (!file.type.startsWith("image/")) {
+      setError("That file isn't an image.");
+      return;
+    }
+    if (file.size > 8_000_000) {
+      setError("Photo is too large — keep it under 8MB.");
+      return;
+    }
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("read failed"));
+      reader.readAsDataURL(file);
+    });
+    setPhoto(dataUrl);
+    setReading(true);
+    try {
+      const res = await readLabelFn({ data: { image: dataUrl } });
+      if (res.ok) run(res.text);
+      else setError(res.error);
+    } catch (e) {
+      console.error(e);
+      setError("Could not read that photo. Try again.");
+    } finally {
+      setReading(false);
+    }
+  };
+
+
   const shown =
     result ??
     ({
