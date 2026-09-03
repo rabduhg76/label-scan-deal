@@ -142,3 +142,42 @@
     color: var(--color-foreground);
   }
 }
+
+/* --- Gluten Free Deal design system --- */
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-ice: var(--ice);
+  --color-deep: var(--deep);
+  --color-danger: var(--danger);
+  --font-display: var(--font-display-family);
+  --font-body: var(--font-body-family);
+}
+
+:root {
+  --brand: oklch(0.94 0.21 116);
+  --brand-foreground: oklch(0.16 0.03 260);
+  --ice: oklch(0.85 0.07 240);
+  --deep: oklch(0.16 0.03 260);
+  --danger: oklch(0.66 0.2 25);
+  --font-display-family: "Space Grotesk", sans-serif;
+  --font-body-family: "Outfit", sans-serif;
+}
+
+.clip-scan { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 92%); }
+.clip-badge { clip-path: polygon(0 0, 100% 0, 100% 100%, 18% 100%, 0 78%); }
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, var(--brand) 48%, var(--brand) 52%, transparent 100%);
+  background-size: 100% 220%;
+  opacity: 0.25;
+  animation: scan 3.4s linear infinite;
+}
+
+@keyframes scan {
+  0% { background-position: 0 -120%; }
+  100% { background-position: 0 120%; }
+}
