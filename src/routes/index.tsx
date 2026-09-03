@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { analyze, type Result } from "@/lib/gluten";
+import { readLabel } from "@/lib/read-label.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
