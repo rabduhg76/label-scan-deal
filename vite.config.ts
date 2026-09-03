@@ -6,7 +6,7 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import path from "node:path";
-import { readdirSync, statSync } from "node:fs";
+import { readdirSync, statSync, existsSync } from "node:fs";
 
 const debugEntries = () => {
   try {
@@ -26,9 +26,23 @@ const debugEntries = () => {
   }
 };
 
+const ENV_HARD_FAIL =
+  "FATAL: .env file present in working tree. Move secrets to Cloudflare Pages env vars.";
+
+const guardEnv = {
+  name: "guard-env-file",
+  buildStart() {
+    if (existsSync(path.resolve(process.cwd(), ".env"))) {
+      console.error(`[guard-env-file] ${ENV_HARD_FAIL}`);
+      throw new Error(ENV_HARD_FAIL);
+    }
+  },
+};
+
 export default defineConfig({
   vite: {
     plugins: [
+      guardEnv,
       {
         name: "debug-pre-config",
         config(_userConfig, _env) {
