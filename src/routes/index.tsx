@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { analyze, type Result } from "@/lib/gluten";
+import { readLabel } from "@/lib/read-label.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,18 +38,54 @@ const BADGE: Record<Result["level"], { label: string; cls: string }> = {
 function Index() {
   const [text, setText] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const readLabelFn = useServerFn(readLabel);
 
   const run = (value: string) => {
     setText(value);
     setResult(value.trim() ? analyze(value) : null);
   };
 
+  const onFile = async (file: File) => {
+    setError(null);
+    if (!file.type.startsWith("image/")) {
+      setError("That file isn't an image.");
+      return;
+    }
+    if (file.size > 8_000_000) {
+      setError("Photo is too large — keep it under 8MB.");
+      return;
+    }
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("read failed"));
+      reader.readAsDataURL(file);
+    });
+    setPhoto(dataUrl);
+    setReading(true);
+    try {
+      const res = await readLabelFn({ data: { image: dataUrl } });
+      if (res.ok) run(res.text);
+      else setError(res.error);
+    } catch (e) {
+      console.error(e);
+      setError("Could not read that photo. Try again.");
+    } finally {
+      setReading(false);
+    }
+  };
+
+
   const shown =
     result ??
     ({
       level: "safe",
       headline: "Awaiting a label",
-      detail: "Paste an ingredient list to get a verdict.",
+      detail: "Upload a label photo or paste an ingredient list.",
       confidence: 0,
       findings: [],
     } as Result);
@@ -99,8 +137,8 @@ function Index() {
                 <span className="block text-brand">Trust the result.</span>
               </h1>
               <p className="mt-6 text-white/60 text-lg max-w-md leading-relaxed">
-                Paste any ingredient list and Gluten Free Deal flags the risky grains, the
-                certified-safe picks, and the sneaky cross-contacts in under a second.
+                Upload a photo of the label or paste the ingredient list — Gluten Free Deal reads it
+                and flags the risky grains, hidden malt and cross-contacts in seconds.
               </p>
 
               <label htmlFor="label-input" className="sr-only">
@@ -117,11 +155,30 @@ function Index() {
               />
 
               <div className="mt-4 flex flex-wrap gap-3">
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void onFile(f);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={reading}
+                  className="clip-scan bg-brand text-brand-foreground font-display font-bold text-sm px-6 py-3.5 disabled:opacity-60"
+                >
+                  {reading ? "Reading photo…" : "Upload a label photo"}
+                </button>
                 <button
                   onClick={() => run(text)}
                   className="clip-scan bg-white text-deep font-display font-bold text-sm px-6 py-3.5"
                 >
-                  Scan a label
+                  Scan text
                 </button>
                 <button
                   onClick={() => run(SAMPLE)}
@@ -130,6 +187,30 @@ function Index() {
                   <span className="text-brand font-bold">+</span> Try a sample label
                 </button>
               </div>
+
+              {error && (
+                <p className="mt-3 text-sm text-danger">{error}</p>
+              )}
+
+              {photo && (
+                <div className="mt-4 flex items-center gap-3">
+                  <img
+                    src={photo}
+                    alt="Uploaded food label"
+                    className="h-16 w-16 rounded-lg object-cover border border-white/15"
+                  />
+                  <button
+                    onClick={() => {
+                      setPhoto(null);
+                      setError(null);
+                    }}
+                    className="text-xs text-white/50 hover:text-white underline"
+                  >
+                    Remove photo
+                  </button>
+                </div>
+              )}
+
 
               <div className="mt-9 flex items-center gap-6 text-sm">
                 <div>
@@ -222,7 +303,7 @@ function Index() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              ["01", "Paste it", "Drop in any packaged ingredient list."],
+              ["01", "Upload or paste", "Snap the label photo or paste the ingredient list."],
               ["02", "Auto-parse", "Every term is matched live to the watch-list."],
               ["03", "Risk flag", "Grains, additives and cross-contacts flagged."],
               ["04", "Verdict", "A clear safe, caution or avoid result."],
