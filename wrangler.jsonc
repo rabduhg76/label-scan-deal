@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "label-scan-deal",
-  "main": "@tanstack/react-start/server-entry",
+  "main": ".output/server/index.mjs",
   "compatibility_date": "2026-08-31",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
