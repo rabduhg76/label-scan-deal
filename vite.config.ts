@@ -12,17 +12,17 @@ const debugEntries = () => {
   try {
     const cwd = process.cwd();
     const srcDir = path.resolve(cwd, "src");
-    console.error("[DEBUG] cwd:", cwd);
-    console.error("[DEBUG] src dir:", srcDir, "exists:", statSync(srcDir).isDirectory());
+    process.stdout.write(`[DEBUG] cwd: ${cwd}\n`);
+    process.stdout.write(`[DEBUG] src dir: ${srcDir} exists: ${statSync(srcDir).isDirectory()}\n`);
     const list = readdirSync(srcDir);
-    console.error("[DEBUG] src contents:", list.join(","));
+    process.stdout.write(`[DEBUG] src contents: ${list.join(",")}\n`);
     const candidates = ["router.tsx", "router.ts", "start.ts", "server.ts", "client.tsx"];
     for (const c of candidates) {
       const p = path.resolve(srcDir, c);
-      console.error(`[DEBUG] ${c} exists:`, statSync(p).isFile());
+      process.stdout.write(`[DEBUG] ${c} exists: ${statSync(p).isFile()}\n`);
     }
   } catch (e: any) {
-    console.error("[DEBUG] failed:", e?.message);
+    process.stdout.write(`[DEBUG] failed: ${e?.message}\n`);
   }
 };
 
@@ -33,7 +33,7 @@ const guardEnv = {
   name: "guard-env-file",
   buildStart() {
     if (existsSync(path.resolve(process.cwd(), ".env"))) {
-      console.error(`[guard-env-file] ${ENV_HARD_FAIL}`);
+      process.stdout.write(`[guard-env-file] ${ENV_HARD_FAIL}\n`);
       throw new Error(ENV_HARD_FAIL);
     }
   },
@@ -53,7 +53,7 @@ export default defineConfig({
       {
         name: "debug-resolved",
         configResolved(config) {
-          console.error("[DEBUG] vite.root:", config.root);
+          process.stdout.write(`[DEBUG] vite.root: ${config.root}\n`);
         },
       },
     ],
