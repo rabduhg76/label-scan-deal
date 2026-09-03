@@ -155,11 +155,30 @@ function Index() {
               />
 
               <div className="mt-4 flex flex-wrap gap-3">
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void onFile(f);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={reading}
+                  className="clip-scan bg-brand text-brand-foreground font-display font-bold text-sm px-6 py-3.5 disabled:opacity-60"
+                >
+                  {reading ? "Reading photo…" : "Upload a label photo"}
+                </button>
                 <button
                   onClick={() => run(text)}
                   className="clip-scan bg-white text-deep font-display font-bold text-sm px-6 py-3.5"
                 >
-                  Scan a label
+                  Scan text
                 </button>
                 <button
                   onClick={() => run(SAMPLE)}
@@ -168,6 +187,30 @@ function Index() {
                   <span className="text-brand font-bold">+</span> Try a sample label
                 </button>
               </div>
+
+              {error && (
+                <p className="mt-3 text-sm text-danger">{error}</p>
+              )}
+
+              {photo && (
+                <div className="mt-4 flex items-center gap-3">
+                  <img
+                    src={photo}
+                    alt="Uploaded food label"
+                    className="h-16 w-16 rounded-lg object-cover border border-white/15"
+                  />
+                  <button
+                    onClick={() => {
+                      setPhoto(null);
+                      setError(null);
+                    }}
+                    className="text-xs text-white/50 hover:text-white underline"
+                  >
+                    Remove photo
+                  </button>
+                </div>
+              )}
+
 
               <div className="mt-9 flex items-center gap-6 text-sm">
                 <div>
