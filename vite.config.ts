@@ -40,24 +40,22 @@ const guardEnv = {
 };
 
 export default defineConfig({
-  vite: {
-    plugins: [
-      guardEnv,
-      {
-        name: "debug-pre-config",
-        config(_userConfig, _env) {
-          debugEntries();
-          return {};
-        },
+  plugins: [
+    guardEnv,
+    {
+      name: "debug-pre-config",
+      config(_userConfig, _env) {
+        debugEntries();
+        return {};
       },
-      {
-        name: "debug-resolved",
-        configResolved(config) {
-          process.stdout.write(`[DEBUG] vite.root: ${config.root}\n`);
-        },
+    },
+    {
+      name: "debug-resolved",
+      configResolved(config) {
+        process.stdout.write(`[DEBUG] vite.root: ${config.root}\n`);
       },
-    ],
-  },
+    },
+  ],
   tanstackStart: {
     router: { entry: "router.tsx" },
     server: { entry: "server.ts" },
