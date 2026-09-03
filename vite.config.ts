@@ -57,7 +57,7 @@ export default defineConfig({
     },
   ],
   tanstackStart: {
-    router: { entry: "router.tsx" },
+    router: { entry: "router.tanstack.tsx" },
     server: { entry: "server.ts" },
     start: { entry: "start.ts" },
   },
