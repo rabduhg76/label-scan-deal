@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "node -e \"const fs=require('fs');if(!fs.existsSync('src/router.tsx'))throw new Error('MISSING src/router.tsx. cwd='+process.cwd()+' files='+fs.readdirSync('.'))\" && vite build",
+    "build": "vite build && npx wrangler deploy",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
